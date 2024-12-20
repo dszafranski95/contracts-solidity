@@ -1,0 +1,103 @@
+# FixedPriceAuction Contracts
+
+## Overview
+
+The **FixedPriceAuction** project consists of two Solidity smart contracts designed to facilitate fixed-price auctions on the Ethereum blockchain. This system allows sellers to create individual auctions for products, enabling buyers to purchase items at predetermined prices. An arbiter is designated to oversee and resolve any disputes that may arise during the auction process.
+
+## Contracts
+
+### 1. SingleAuction.sol
+
+#### Description
+
+The `SingleAuction` contract represents an individual auction where a single product is sold at a fixed price. It manages the auction lifecycle, including purchasing, updating product details, extending deadlines, and handling cancellations. The contract ensures secure transactions by leveraging OpenZeppelin's `ReentrancyGuard` to prevent reentrancy attacks.
+
+#### Key Features
+
+- **Fixed-Price Purchase:** Buyers can purchase the product by sending the exact or exceeding amount of ETH. Any excess ETH is refunded automatically.
+- **Auction Lifecycle Management:** Sellers can update product descriptions and images, extend auction deadlines, or cancel the auction if needed.
+- **Arbiter Role:** An arbiter is designated to resolve disputes and can end the auction if the deadline passes without a sale.
+- **Security:** Utilizes `ReentrancyGuard` to protect against reentrancy attacks and ensures safe ETH transfers.
+
+#### State Variables
+
+- `seller`: Address of the seller creating the auction.
+- `arbiter`: Address of the arbiter responsible for dispute resolution.
+- `buyer`: Address of the buyer who purchases the item.
+- `price`: Fixed price of the product in wei.
+- `productName`: Name of the product.
+- `description`: Description of the product.
+- `imageUrl`: URL of the product image.
+- `isActive`: Indicates if the auction is currently active.
+- `deadline`: Timestamp representing the auction's end time.
+- `isCancelled`: Indicates if the auction has been cancelled.
+
+#### Key Functions
+
+- `buy()`: Allows a buyer to purchase the product by sending ETH. Refunds any excess ETH beyond the fixed price.
+- `endAuction()`: Allows the arbiter to end the auction after the deadline if the item hasn't been bought.
+- `updateDescription(string memory _description)`: Allows the seller to update the product description.
+- `updateImageUrl(string memory _imageUrl)`: Allows the seller to update the product image URL.
+- `cancelAuction()`: Allows the seller to cancel the auction before the item is sold.
+- `extendDeadline(uint256 _additionalTime)`: Allows the seller or arbiter to extend the auction deadline.
+
+### 2. AuctionFactory.sol
+
+#### Description
+
+The `AuctionFactory` contract serves as a factory for deploying and managing multiple `SingleAuction` instances. It allows the contract owner to create new auctions, keep track of all deployed auctions, and retrieve auction information efficiently.
+
+#### Key Features
+
+- **Auction Deployment:** Enables the owner to create new `SingleAuction` contracts with specified parameters.
+- **Auction Management:** Maintains an array of all deployed auctions and provides functions to retrieve them.
+- **Pagination Support:** Implements a `getAuctions` function to fetch auctions in batches, facilitating efficient data retrieval.
+
+#### State Variables
+
+- `auctions`: An array storing all deployed `SingleAuction` contracts.
+- `auctionCount`: Counter tracking the number of auctions created.
+
+#### Key Functions
+
+- `createAuction(...)`: Deploys a new `SingleAuction` contract with the provided parameters and adds it to the `auctions` array.
+- `getAuctions(uint256 _start, uint256 _limit)`: Retrieves a subset of auctions for pagination purposes.
+- `getAuctionAddress(uint256 _id)`: Retrieves the address of a specific auction by its ID.
+
+## Installation
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/yourusername/FixedPriceAuction.git
+   cd FixedPriceAuction/contracts
+   ```
+
+Install Dependencies Ensure you have Node.js and npm installed. Then, install the necessary packages:
+
+    npm install @openzeppelin/contracts
+
+    Compile Contracts Use your preferred Solidity development environment (e.g., Hardhat, Truffle) to compile the contracts.
+
+Usage
+
+    Deploy the AuctionFactory Contract Deploy the AuctionFactory contract to your desired Ethereum network.
+
+    Create a New Auction Call the createAuction function on the AuctionFactory contract with the necessary parameters:
+        _price: Fixed price of the product in wei.
+        _productName: Name of the product.
+        _duration: Duration of the auction in seconds.
+        _arbiter: Address of the arbiter.
+        _imageUrl: URL of the product image.
+        _description: Description of the product.
+
+    Interact with Single Auctions Each deployed SingleAuction can be interacted with individually to perform actions such as purchasing the product, updating details, or managing the auction lifecycle.
+
+Security Considerations
+
+    Reentrancy Protection: The SingleAuction contract uses OpenZeppelin's ReentrancyGuard to prevent reentrancy attacks during ETH transfers.
+    Access Control: Functions are restricted using modifiers to ensure that only authorized roles (seller, arbiter, owner) can perform certain actions.
+    Input Validation: The contracts include require statements to validate inputs and ensure the integrity of auction operations.
+
+License
+
+This project is licensed under the MIT License. See the LICENSE file for details.
